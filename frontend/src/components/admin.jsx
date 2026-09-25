@@ -1,0 +1,171 @@
+import { useState, useEffect, useContext, useRef } from "react";
+import socket from "./socket.js";
+import { UserContext } from "./parent.jsx";
+
+import "./admin.css"
+
+export default function Admin() {
+
+    const { toggle, settoggle } = useContext(UserContext)
+
+    const [show, setShow] = useState([])
+    const [message, setMessage] = useState("")
+    const [online, setOnline] = useState([])
+    const [chek, setChek] = useState(false)
+    const [type, setType] = useState(false)
+    const typeRef = useRef(null)
+    const [typerecive, setTyperecive] = useState(false)
+
+    const currentrole = "admin";
+
+
+    useEffect(() => {
+        socket.connect();
+
+        // Backend se connection hone par
+        socket.on("connect", () => {
+            console.log("Backend Connected to User");
+
+            // Frontend se backend ko message
+            socket.emit("frontendMessage", "Hello from admin");
+        });
+
+        // Backend se message receive karna
+        socket.on("backendMessage", (data) => {
+            console.log("Backend says for admin:", data);
+        });
+
+        // Backend ke reply ko receive karna
+        socket.on("backendReply", (data) => {
+            console.log("Backend reply fro admin:", data);
+        });
+
+        socket.on("frontenddata", (data) => {
+            console.log(data)
+            setShow(prev => [...prev, data])
+        });
+
+        socket.on("arrydata", (data) => {
+            console.log(data);
+            setOnline(prev => [...prev, data])
+
+            if (!online.includes(data)) {
+                setChek(true)
+            } else {
+                setChek(false)
+            }
+        })
+
+        socket.on("typetrack", (data) => {
+            setTyperecive(data.type)
+        })
+
+        return () => {
+            socket.disconnect();
+        }
+
+    }, [])
+
+
+    useEffect(() => {
+
+        socket.emit("typetrack", { type: type })
+
+    }, [type])
+
+    const sendclick = () => {
+
+        const messageObject = { message: message, role: currentrole }
+
+        socket.emit("frontenddata", messageObject);
+
+        setMessage("")
+
+    }
+
+
+    const InputType = () => {
+        setType(true);
+
+        clearTimeout(typeRef.current)
+
+        typeRef.current = setTimeout(() => {
+            setType(false);
+        }, 1000)
+    }
+
+
+    return (
+        <div className="d-flex flex-column min-vh-100 ">
+            <header className="d-flex justify-content-between header-color p-3 fixed-top ">
+
+                <div className="d-flex justify-content-between">
+
+                    <span className="bi bi-arrow-left fs-2 "></span>
+
+                    <div>
+                        <div className="d-flex align-items-center mx-3">
+                            <h3>Admin</h3>
+                        </div>
+                        <span className="text-secondary">
+                            {typerecive ? "typing..." : chek ? "online..." : ""}
+                        </span>
+                    </div>
+
+                </div>
+
+                <div>
+                    <button className="btn" onClick={() => settoggle(pre => !pre)}><span className={toggle ? "bi bi-sun" : "bi bi-moon"}></span></button>
+                </div>
+
+            </header>
+
+
+            <main className="flex-grow-1 p-3 "
+                style={{
+                    backgroundColor: toggle ? "#000000" : "#f5f7fb",
+                    overflowY: "auto",
+                    maxHeight: "100%",
+                    marginTop: "70px",
+                    marginBottom: "70px"
+                }}
+            >
+
+                <div className="d-flex flex-column gap-2">
+
+                    {show.map((data, index) => (
+                        <div key={index} className={`d-flex ${data.role === currentrole ? "justify-content-end" : "justify-content-start"}`} >
+
+                            <div className="px-3 py-2 rounded-3 shadow-sm"
+                                style={{
+                                    maxWidth: "100%",
+                                    backgroundColor:
+                                        data.role === currentrole
+                                            ? "#0d6efd"
+                                            : "#ffffff",
+                                    color:
+                                        data.role === currentrole
+                                            ? "#ffffff"
+                                            : "#212529",
+                                }}
+                            >
+                                <div className="small fw-semibold mb-1">
+                                    {data.role === "admin" ? "Admin" : "User"}
+                                </div>
+
+                                <div>{data.message}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </main>
+
+            <footer className="fixed-bottom" style={{ background: toggle ? "black" : "white" }}>
+                <div className="d-flex justify-content-between m-3 ">
+                    <input type="text" className="form-control foots" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={InputType} />
+                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} >Send User</button>
+                </div>
+            </footer>
+        </div>
+    )
+}
