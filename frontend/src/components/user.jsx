@@ -15,7 +15,7 @@ export default function User() {
     const typeRef = useRef(null)
     const [typerecive, setTyperecive] = useState(false)
     const currentrole = "user";
-
+    const scrolleref = useRef(null)
 
     useEffect(() => {
         socket.connect();
@@ -23,8 +23,8 @@ export default function User() {
         socket.on("connect", () => {
             console.log("Backend Connected to User");
 
-              const roleobj = {role:currentrole,msg:"i am user"}
-           
+            const roleobj = { role: currentrole, msg: "i am user" }
+
             socket.emit("frontendMessage", roleobj);
         });
 
@@ -44,7 +44,7 @@ export default function User() {
 
         socket.on("arrydata", (data) => {
             console.log(data);
-            setOnline(prev => [...prev, data])
+            setOnline(data)
 
             if (!online.includes(data)) {
                 setChek(true)
@@ -94,6 +94,13 @@ export default function User() {
     }
 
 
+    useEffect(() => {
+        if (scrolleref.current) {
+            scrolleref.current.scrollTop = scrolleref.current.scrollHeight
+        }
+    }, [show])
+
+
     return (
         <div className="d-flex flex-column min-vh-100">
             <header className="d-flex justify-content-between header-color p-3 fixed-top ">
@@ -120,11 +127,11 @@ export default function User() {
             </header>
 
 
-            <main className="flex-grow-1 p-3 main-color"
+            <main className="flex-grow-1 p-3 main-color" ref={scrolleref}
                 style={{
                     backgroundColor: toggle ? "#000000" : "#f5f7fb",
                     overflowY: "auto",
-                    maxHeight: "100%",
+                    height: "calc(100vh - 140px)",
                     marginTop: "70px",
                     marginBottom: "70px"
                 }}
@@ -162,7 +169,7 @@ export default function User() {
             <footer className="fixed-bottom" style={{ background: toggle ? "black" : "white" }}>
                 <div className="d-flex justify-content-between m-3 ">
                     <input type="text" className="form-control foots" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={InputType} />
-                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} >Send User</button>
+                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} ><span className={`bi bi-send ${message.length <= 0 ? "text-secondary" : "text-white"}`}></span></button>
                 </div>
             </footer>
         </div>

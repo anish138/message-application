@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useRef } from "react";
 import socket from "./socket.js";
 import { UserContext } from "./parent.jsx";
 
+
 import "./admin.css"
 
 export default function Admin() {
@@ -15,7 +16,7 @@ export default function Admin() {
     const [type, setType] = useState(false)
     const typeRef = useRef(null)
     const [typerecive, setTyperecive] = useState(false)
-    
+    const scrolleref = useRef(null)
 
     const currentrole = "admin";
 
@@ -27,8 +28,8 @@ export default function Admin() {
         socket.on("connect", () => {
             console.log("Backend Connected to User");
 
-            const roleobj = {role:currentrole,msg:"i am admin"}
-           
+            const roleobj = { role: currentrole, msg: "i am admin" }
+
             socket.emit("frontendMessage", roleobj);
         });
 
@@ -41,14 +42,14 @@ export default function Admin() {
             console.log("Backend reply fro admin:", data);
         });
 
-        socket.on("frontenddata", (data) => {      
+        socket.on("frontenddata", (data) => {
             console.log(data)
             setShow(prev => [...prev, data])
         });
 
         socket.on("arrydata", (data) => {
             console.log(data);
-            setOnline(prev => [...prev, data])
+            setOnline(data)
 
             if (!online.includes(data)) {
                 setChek(true)
@@ -76,7 +77,7 @@ export default function Admin() {
 
     const sendclick = () => {
 
-       
+
 
         const messageObject = { messages: message, role: currentrole }
 
@@ -96,6 +97,12 @@ export default function Admin() {
             setType(false);
         }, 1000)
     }
+
+    useEffect(()=>{
+        if(scrolleref.current){
+            scrolleref.current.scrollTop = scrolleref.current.scrollHeight
+        }
+    },[show])
 
 
     return (
@@ -124,11 +131,11 @@ export default function Admin() {
             </header>
 
 
-            <main className="flex-grow-1 p-3 "
+            <main className="flex-grow-1 p-3 " ref={scrolleref}
                 style={{
                     backgroundColor: toggle ? "#000000" : "#f5f7fb",
                     overflowY: "auto",
-                    maxHeight: "100%",
+                    height: "calc(100vh - 140px)",
                     marginTop: "70px",
                     marginBottom: "70px"
                 }}
@@ -166,7 +173,7 @@ export default function Admin() {
             <footer className="fixed-bottom" style={{ background: toggle ? "black" : "white" }}>
                 <div className="d-flex justify-content-between m-3 ">
                     <input type="text" className="form-control foots" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={InputType} />
-                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} >Send User</button>
+                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} ><span className={`bi bi-send ${message.length <= 0?"text-secondary":"text-white"}`}></span></button>
                 </div>
             </footer>
         </div>
