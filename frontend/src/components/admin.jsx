@@ -15,6 +15,7 @@ export default function Admin() {
     const [type, setType] = useState(false)
     const typeRef = useRef(null)
     const [typerecive, setTyperecive] = useState(false)
+    
 
     const currentrole = "admin";
 
@@ -26,13 +27,13 @@ export default function Admin() {
         socket.on("connect", () => {
             console.log("Backend Connected to User");
 
-            // Frontend se backend ko message
-            socket.emit("frontendMessage", "Hello from admin");
+            const roleobj = {role:currentrole,msg:"i am admin"}
+           
+            socket.emit("frontendMessage", roleobj);
         });
 
-        // Backend se message receive karna
         socket.on("backendMessage", (data) => {
-            console.log("Backend says for admin:", data);
+            setShow(data)
         });
 
         // Backend ke reply ko receive karna
@@ -40,7 +41,7 @@ export default function Admin() {
             console.log("Backend reply fro admin:", data);
         });
 
-        socket.on("frontenddata", (data) => {
+        socket.on("frontenddata", (data) => {      
             console.log(data)
             setShow(prev => [...prev, data])
         });
@@ -75,7 +76,9 @@ export default function Admin() {
 
     const sendclick = () => {
 
-        const messageObject = { message: message, role: currentrole }
+       
+
+        const messageObject = { messages: message, role: currentrole }
 
         socket.emit("frontenddata", messageObject);
 
@@ -134,26 +137,26 @@ export default function Admin() {
                 <div className="d-flex flex-column gap-2">
 
                     {show.map((data, index) => (
-                        <div key={index} className={`d-flex ${data.role === currentrole ? "justify-content-end" : "justify-content-start"}`} >
+                        <div key={index} className={`d-flex ${data.sendroles === currentrole ? "justify-content-end" : "justify-content-start"}`} >
 
                             <div className="px-3 py-2 rounded-3 shadow-sm"
                                 style={{
                                     maxWidth: "100%",
                                     backgroundColor:
-                                        data.role === currentrole
+                                        data.sendroles === currentrole
                                             ? "#0d6efd"
                                             : "#ffffff",
                                     color:
-                                        data.role === currentrole
+                                        data.sendroles === currentrole
                                             ? "#ffffff"
                                             : "#212529",
                                 }}
                             >
                                 <div className="small fw-semibold mb-1">
-                                    {data.role === "admin" ? "Admin" : "User"}
+                                    {data.sendroles === "admin" ? "Admin" : "User"}
                                 </div>
 
-                                <div>{data.message}</div>
+                                <div>{data.messages}</div>
                             </div>
                         </div>
                     ))}
