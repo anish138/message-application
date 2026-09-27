@@ -58,6 +58,11 @@ export default function User() {
             setTyperecive(data.type)
         })
 
+        socket.on("connectionchek", (data) => {
+
+            alert(data)
+        })
+
 
         return () => {
             socket.disconnect();

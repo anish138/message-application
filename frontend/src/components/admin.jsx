@@ -62,6 +62,10 @@ export default function Admin() {
             setTyperecive(data.type)
         })
 
+        socket.on("connectionchek",(data)=>{
+            alert(data)
+        })
+
         return () => {
             socket.disconnect();
         }
