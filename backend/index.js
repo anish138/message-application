@@ -10,7 +10,7 @@ dotenv.config()
 import { connectdb } from "./config/db.js";
 import Msgmodel from "./models/messages.js";
 import Users from "./models/usercollection.js";
-
+    
 connectdb()
 
 const app = express();
@@ -71,11 +71,15 @@ io.on("connection", async (socket) => {
 
         const senderId = socket.id;
 
-        const sendroles = data.role;
+        const sendroles = data?.role;
 
         const reciveR = UserRole.find(item => item.role !== data.role)
 
         const reciverrole = reciveR?.role
+
+        if (!reciverrole || !sendroles)
+            return socket.emit("connectionchek", "admin and user connected required")
+
 
         savemesg(data.messages, sendroles, reciverrole)
 
@@ -112,5 +116,5 @@ io.on("connection", async (socket) => {
 
 
 server.listen(process.env.PORT, () => {
-    console.log("Server running at http://localhost:3000");
+    console.log("Server running at http://localhost:3030");
 });

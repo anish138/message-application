@@ -62,7 +62,7 @@ export default function Admin() {
             setTyperecive(data.type)
         })
 
-        socket.on("connectionchek",(data)=>{
+        socket.on("connectionchek", (data) => {
             alert(data)
         })
 
@@ -92,7 +92,12 @@ export default function Admin() {
     }
 
 
-    const InputType = () => {
+    const InputType = (e) => {
+
+        if (e.key === "Enter") {
+            sendclick()
+        }
+        
         setType(true);
 
         clearTimeout(typeRef.current)
@@ -102,11 +107,11 @@ export default function Admin() {
         }, 1000)
     }
 
-    useEffect(()=>{
-        if(scrolleref.current){
+    useEffect(() => {
+        if (scrolleref.current) {
             scrolleref.current.scrollTop = scrolleref.current.scrollHeight
         }
-    },[show])
+    }, [show])
 
 
     return (
@@ -177,7 +182,7 @@ export default function Admin() {
             <footer className="fixed-bottom" style={{ background: toggle ? "black" : "white" }}>
                 <div className="d-flex justify-content-between m-3 ">
                     <input type="text" className="form-control foots" placeholder="Enter message..." value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={InputType} />
-                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} ><span className={`bi bi-send ${message.length <= 0?"text-secondary":"text-white"}`}></span></button>
+                    <button className="input-group-text btn btns mx-1 ms-3" onClick={() => sendclick()} ><span className={`bi bi-send ${message.length <= 0 ? "text-secondary" : "text-white"}`}></span></button>
                 </div>
             </footer>
         </div>
